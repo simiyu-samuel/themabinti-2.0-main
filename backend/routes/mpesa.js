@@ -93,6 +93,18 @@ router.post('/callback', async (req, res) => {
   }
 });
 
+// M-Pesa callback URL for seller package payments
+router.post('/seller-package-callback', async (req, res) => {
+  try {
+    const result = await mpesaService.handleSellerPackageCallback(req.body);
+    res.json(result);
+  } catch (error) {
+    console.error('Seller package callback error:', error);
+    // Still return 200 to acknowledge receipt of callback
+    res.json({ success: false, message: error.message });
+  }
+});
+
 // M-Pesa callback URL for service payments
 router.post('/service-callback', async (req, res) => {
   try {

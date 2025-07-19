@@ -70,7 +70,7 @@ const SellerPackages = () => {
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold mb-4">Choose Your Seller Package</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Select a package that best suits your needs. You can upgrade or change your package anytime after registration.
+          Select a package that best suits your needs. Payment will be required via M-Pesa to complete registration.
         </p>
       </div>
 
@@ -133,11 +133,11 @@ const SellerPackages = () => {
           className="bg-purple-500 hover:bg-purple-600 px-8 py-2"
           disabled={!selectedPackage}
         >
-          Continue to Registration
+          Continue to Registration & Payment
         </Button>
         
         <p className="mt-4 text-sm text-gray-500">
-          You can upgrade or change your package anytime after registration.
+          Payment via M-Pesa is required to complete registration and activate your seller account.
         </p>
       </div>
     </div>
