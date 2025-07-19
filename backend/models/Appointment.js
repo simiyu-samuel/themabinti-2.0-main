@@ -28,6 +28,12 @@ const appointmentSchema = new mongoose.Schema({
     trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address']
   },
+  phoneNumber: {
+    type: String,
+    required: true,
+    trim: true,
+    match: [/^\+?\d{10,15}$/, 'Please enter a valid phone number']
+  },
   date: {
     type: Date,
     required: true

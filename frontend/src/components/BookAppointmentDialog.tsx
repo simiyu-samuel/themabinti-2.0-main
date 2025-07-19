@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/config/api';
 
 interface TimeSlot {
@@ -48,6 +48,7 @@ interface BookAppointmentDialogProps {
 const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmentDialogProps) => {
   const { id: urlServiceId } = useParams<{ id: string }>();
   const actualServiceId = serviceId || urlServiceId;
+  const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('appointment');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -58,6 +59,7 @@ const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmen
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -72,7 +74,7 @@ const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmen
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedDate || !selectedTime || !name || !email) {
+    if (!selectedDate || !selectedTime || !name || !email || !phoneNumber) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -84,19 +86,27 @@ const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmen
         serviceId: actualServiceId,
         name,
         email,
+        phoneNumber,
         date: selectedDate,
         time: selectedTime,
         message
       });
       
-      toast.success('Appointment booked successfully!');
+      const appointmentId = response.data.appointment._id;
       
-      // Reset form and close dialog
-      setSelectedDate(undefined);
-      setSelectedTime(null);
-      setName('');
-      setEmail('');
-      setMessage('');
+      // Navigate to payment page with appointment details
+      navigate('/payment', {
+        state: {
+          appointmentId,
+          serviceId: actualServiceId,
+          customerName: name,
+          customerEmail: email,
+          customerPhone: phoneNumber,
+          appointmentDate: selectedDate,
+          appointmentTime: selectedTime
+        }
+      });
+      
       onOpenChange(false);
     } catch (error: any) {
       console.error('Error booking appointment:', error);
@@ -200,6 +210,18 @@ const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmen
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input 
+                  id="phoneNumber" 
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="0712345678"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="message">Message</Label>
                 <Textarea 
                   id="message" 
@@ -212,10 +234,10 @@ const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmen
               
               <Button 
                 type="submit" 
-                className="w-full bg-purple-500 hover:bg-purple-600"
+                className="w-full bg-purple-500 hover:bg-purple-600" 
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Booking...' : 'Book'}
+                {isSubmitting ? 'Booking...' : 'Continue to Payment'}
               </Button>
             </form>
           </TabsContent>

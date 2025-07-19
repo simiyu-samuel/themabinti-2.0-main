@@ -104,6 +104,175 @@ class MpesaService {
     }
   }
 
+  // Initiate STK Push for service payment
+  async initiateServicePayment(phoneNumber, amount, bookingId, serviceName) {
+    try {
+      const accessToken = await this.getAccessToken();
+      const timestamp = this.getTimestamp();
+      const password = this.generatePassword();
+
+      // Format phone number (ensure it starts with 254)
+      const formattedPhone = phoneNumber.startsWith('254') ? phoneNumber : `254${phoneNumber.replace(/^0/, '')}`;
+
+      const payload = {
+        BusinessShortCode: this.shortcode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: amount,
+        PartyA: formattedPhone,
+        PartyB: this.shortcode,
+        PhoneNumber: formattedPhone,
+        CallBackURL: `${process.env.BASE_URL}/api/mpesa/service-callback`,
+        AccountReference: `SVC-${bookingId}`,
+        TransactionDesc: `Payment for ${serviceName}`
+      };
+
+      const response = await axios.post(
+        `${this.baseUrl}/mpesa/stkpush/v1/processrequest`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Store the checkout request ID for status checking
+      const checkoutRequestId = response.data.CheckoutRequestID;
+      await this.storeServicePaymentRequest(checkoutRequestId, {
+        bookingId,
+        amount,
+        phoneNumber: formattedPhone,
+        timestamp,
+        status: 'pending'
+      });
+
+      return {
+        success: true,
+        checkoutRequestId,
+        message: 'STK Push initiated successfully'
+      };
+    } catch (error) {
+      console.error('Service STK Push initiation error:', error.response?.data || error);
+      throw new Error(error.response?.data?.errorMessage || 'Failed to initiate service payment');
+    }
+  }
+
+  // Store service payment request in database
+  async storeServicePaymentRequest(checkoutRequestId, paymentData) {
+    try {
+      // For now, we'll store in memory or you can create a separate collection
+      // This is a simplified implementation
+      console.log('Storing service payment request:', {
+        checkoutRequestId,
+        ...paymentData
+      });
+    } catch (error) {
+      console.error('Error storing service payment request:', error);
+      throw new Error('Failed to store service payment request');
+    }
+  }
+
+  // Check service payment status
+  async checkServicePaymentStatus(checkoutRequestId) {
+    try {
+      const accessToken = await this.getAccessToken();
+      const timestamp = this.getTimestamp();
+      const password = this.generatePassword();
+
+      const payload = {
+        BusinessShortCode: this.shortcode,
+        Password: password,
+        Timestamp: timestamp,
+        CheckoutRequestID: checkoutRequestId
+      };
+
+      const response = await axios.post(
+        `${this.baseUrl}/mpesa/stkpushquery/v1/query`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const resultCode = response.data.ResultCode;
+      let status = 'pending';
+
+      if (resultCode === 0) {
+        status = 'success';
+      } else if (resultCode === 1032) {
+        status = 'failed';
+      }
+
+      return { status };
+    } catch (error) {
+      console.error('Service payment status check error:', error.response?.data || error);
+      throw new Error('Failed to check service payment status');
+    }
+  }
+
+  // Handle M-Pesa callback for service payments
+  async handleServiceCallback(callbackData) {
+    try {
+      const { Body: { stkCallback: { CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } } } = callbackData;
+      
+      let status = 'failed';
+      let transactionData = null;
+
+      if (ResultCode === 0 && CallbackMetadata) {
+        status = 'success';
+        // Extract transaction details
+        transactionData = {
+          checkoutRequestId: CheckoutRequestID,
+          mpesaReceiptNumber: CallbackMetadata.Item.find(item => item.Name === 'MpesaReceiptNumber')?.Value,
+          transactionDate: CallbackMetadata.Item.find(item => item.Name === 'TransactionDate')?.Value,
+          amount: CallbackMetadata.Item.find(item => item.Name === 'Amount')?.Value,
+          phoneNumber: CallbackMetadata.Item.find(item => item.Name === 'PhoneNumber')?.Value
+        };
+      }
+
+      // Update service booking status
+      await this.updateServiceBookingStatus(CheckoutRequestID, status, transactionData);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Service callback handling error:', error);
+      throw new Error('Failed to process service callback');
+    }
+  }
+
+  // Update service booking status
+  async updateServiceBookingStatus(checkoutRequestId, status, transactionData = null) {
+    try {
+      const ServiceBooking = require('../models/ServiceBooking');
+      
+      const updateData = {
+        paymentStatus: status === 'success' ? 'completed' : 'failed',
+        updatedAt: new Date()
+      };
+
+      if (transactionData && status === 'success') {
+        updateData.mpesaReceiptNumber = transactionData.mpesaReceiptNumber;
+        updateData.transactionDate = new Date(transactionData.transactionDate);
+      }
+
+      await ServiceBooking.findOneAndUpdate(
+        { mpesaCheckoutRequestId: checkoutRequestId },
+        updateData
+      );
+
+      console.log('Service booking status updated:', { checkoutRequestId, status });
+    } catch (error) {
+      console.error('Error updating service booking status:', error);
+      throw new Error('Failed to update service booking status');
+    }
+  }
+
   // Store payment request in database
   async storePaymentRequest(checkoutRequestId, paymentData) {
     try {

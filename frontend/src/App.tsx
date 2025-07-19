@@ -19,6 +19,7 @@ import AllServicesPage from "./pages/AllServicesPage";
 import SearchResults from "./pages/SearchResults";
 import LocationServices from "./pages/LocationServices";
 import SubcategoryServices from "./pages/SubcategoryServices";
+import PaymentPage from "./pages/PaymentPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/search" element={<SearchResults />} />
           <Route path="/services/location/:location" element={<LocationServices />} />
           <Route path="/services/:category/:subcategory" element={<SubcategoryServices />} />
+          <Route path="/payment" element={<PaymentPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

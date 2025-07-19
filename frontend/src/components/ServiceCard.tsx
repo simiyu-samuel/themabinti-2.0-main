@@ -76,7 +76,7 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
           <Button 
             onClick={handleBookClick} 
             variant="outline" 
-            className="w-full border-purple-500 text-purple-500 hover:bg-purple-50"
+            className="w-full border-purple-500 text-purple-500 hover:bg-purple-50 mb-2"
             disabled={!whatsapp}
           >
             {whatsapp ? (
@@ -88,6 +88,11 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
               'Contact Unavailable'
             )}
           </Button>
+          <Link to={`/service/${id}`}>
+            <Button className="w-full bg-purple-500 hover:bg-purple-600">
+              Book & Pay Online
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </Link>

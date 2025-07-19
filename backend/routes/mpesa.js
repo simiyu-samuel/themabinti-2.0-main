@@ -93,4 +93,16 @@ router.post('/callback', async (req, res) => {
   }
 });
 
-module.exports = router; 
+// M-Pesa callback URL for service payments
+router.post('/service-callback', async (req, res) => {
+  try {
+    const result = await mpesaService.handleServiceCallback(req.body);
+    res.json(result);
+  } catch (error) {
+    console.error('Service callback error:', error);
+    // Still return 200 to acknowledge receipt of callback
+    res.json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;
