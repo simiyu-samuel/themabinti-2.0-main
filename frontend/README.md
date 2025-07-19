@@ -1,73 +1,66 @@
-# Welcome to your Lovable project
+# Themabinti 2.0 – Frontend
 
-## Project info
+Modern React + TypeScript frontend for Themabinti 2.0, built with Vite, Tailwind CSS, shadcn/ui, and Radix UI. Provides a responsive, user-friendly interface for discovering, posting, and booking services.
 
-**URL**: https://lovable.dev/projects/ae5c546a-b40e-4008-9f44-7f9d0d420780
+---
 
-## How can I edit this code?
+## Features
+- User authentication (buyers & sellers, JWT)
+- Seller package selection (basic, standard, premium)
+- Browse/search/filter services by category, subcategory, and location
+- Post services (with media uploads, package limits enforced)
+- Book appointments for services
+- View blog posts
+- Contact form
+- Responsive/mobile-friendly UI
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## Setup
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ae5c546a-b40e-4008-9f44-7f9d0d420780) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### 1. Install dependencies
+```bash
+npm install
 ```
 
-**Edit a file directly in GitHub**
+### 2. Start the development server
+```bash
+npm run dev
+```
+- App runs at: http://localhost:5173
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Scripts
+- `npm run dev` – Start development server
+- `npm run build` – Build for production
+- `npm run preview` – Preview production build
+- `npm run lint` – Lint code
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## Project Structure
+- `src/` – Main source code
+  - `components/` – UI and feature components
+  - `pages/` – Route-based pages
+  - `data/` – Static data (categories, mock data)
+  - `hooks/` – Custom React hooks
+  - `config/` – API config
+  - `lib/` – Utilities
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Environment Variables
+- Configure API base URL in `src/config/api.ts` if needed for local/backend integration.
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/ae5c546a-b40e-4008-9f44-7f9d0d420780) and click on Share -> Publish.
+## Tech Stack
+- React 18, TypeScript, Vite
+- Tailwind CSS, shadcn/ui, Radix UI
+- React Router, React Query, Zod, Axios
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+[MIT](../LICENSE)
