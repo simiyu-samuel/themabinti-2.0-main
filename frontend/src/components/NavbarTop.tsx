@@ -52,6 +52,12 @@ const NavbarTop = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    setIsDrawerOpen(false);
+  };
+
   return (
     <div className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md ${isScrolled ? 'shadow-lg' : 'shadow-sm'} transition-all duration-300`}>
       <div className="container mx-auto py-4">
@@ -220,7 +226,9 @@ const NavbarTop = () => {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={logout}>
-                      Logout
+                      <button onClick={handleLogout} className="w-full text-left">
+                        Logout
+                      </button>
                     </DropdownMenuItem>
                   </>
                 ) : (

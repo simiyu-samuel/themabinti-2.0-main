@@ -32,7 +32,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false, // CHANGE 1: Make phoneNumber optional to align with frontend
     trim: true,
-    match: [/^\+?\d{10,15}$/, 'Please enter a valid phone number'],
+    validate: {
+      validator: function(v) {
+        return !v || /^\+?\d{10,15}$/.test(v);
+      },
+      message: 'Please enter a valid phone number'
+    }
   },
   sellerPackage: {
     type: {

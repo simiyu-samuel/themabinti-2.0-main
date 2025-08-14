@@ -231,6 +231,11 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     const user = await User.findOne({ email }).lean();
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
@@ -250,6 +255,7 @@ router.post('/login', async (req, res) => {
     const responseData = {
       token,
       user: {
+        id: user._id,
         userName: user.userName,
         email: user.email,
         accountType: user.accountType,
@@ -265,4 +271,33 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Get current user profile
+router.get('/profile', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    const user = await User.findById(decoded.userId).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      user: {
+        id: user._id,
+        userName: user.userName,
+        email: user.email,
+        accountType: user.accountType,
+        sellerPackage: user.accountType === 'seller' ? user.sellerPackage : undefined,
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(401).json({ message: 'Invalid token' });
+  }
+});
 module.exports = router;

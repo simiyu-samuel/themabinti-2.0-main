@@ -16,7 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/config/api';
+import { useAuth } from '@/hooks/useAuth';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 
 const SignInForm = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,16 +44,15 @@ const SignInForm = () => {
 
     try {
       // Send login request to backend
-      const response = await axios.post('https://themabinti-main-d4az.onrender.com/api/login', {
+      const response = await api.post('/api/login', {
         email: values.email,
         password: values.password,
       });
 
       console.log('Login response:', response.data);
 
-      // Store token and user data in localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Use auth context to handle login
+      login(response.data.token, response.data.user);
 
       toast.success('Successfully signed in!');
       navigate('/');

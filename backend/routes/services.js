@@ -198,7 +198,6 @@ router.post('/', authMiddleware, async (req, res) => {
       phoneNumber,
       category,
       subcategory,
-      description,
     });
 
     console.log('Saving service:', {
@@ -211,7 +210,6 @@ router.post('/', authMiddleware, async (req, res) => {
       phoneNumber,
       category,
       subcategory,
-      description,
     });
 
     await service.save();

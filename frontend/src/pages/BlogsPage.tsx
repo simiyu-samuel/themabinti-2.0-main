@@ -32,15 +32,15 @@ const BlogsPage = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/blogs');
+        const response = await api.get('/api/blogs');
         
         const formattedBlogs = response.data.map((blog: any) => ({
-          id: blog.id,
+          id: blog._id,
           title: blog.title,
           content: blog.content,
           excerpt: blog.content.substring(0, 150) + '...',
           author: blog.author,
-          created_at: blog.created_at,
+          created_at: blog.createdAt,
           views: blog.views || Math.floor(Math.random() * 500) + 50,
           likes: blog.likes || Math.floor(Math.random() * 100) + 10,
           comments: blog.comments || Math.floor(Math.random() * 50) + 5,

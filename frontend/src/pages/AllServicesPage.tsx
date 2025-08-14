@@ -11,6 +11,7 @@ import { Loader2, Filter, Search, SlidersHorizontal } from 'lucide-react';
 import { ServiceProps } from '@/components/ServiceCard';
 import { serviceCategories } from '@/data/serviceCategories';
 import api from '@/config/api';
+import { Link } from 'react-router-dom';
 
 const AllServicesPage = () => {
   const [services, setServices] = useState<ServiceProps[]>([]);
@@ -30,21 +31,21 @@ const AllServicesPage = () => {
     const fetchServices = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/services');
+        const response = await api.get('/api/services');
         
         const formattedServices: ServiceProps[] = response.data.map((service: any) => ({
-          id: service.id,
+          id: service._id,
           name: service.name,
-          minPrice: service.min_price,
-          maxPrice: service.max_price,
+          minPrice: service.minPrice,
+          maxPrice: service.maxPrice,
           location: service.location,
-          image: service.images?.[0] || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
-          whatsapp: service.phone_number?.replace(/^\+/, '') || '',
+          image: service.media?.find((m: any) => m.type === 'image')?.data || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
+          whatsapp: service.phoneNumber?.replace(/^\+/, '') || '',
           category: service.category,
           subcategory: service.subcategory,
           description: service.description,
-          rating: service.rating || 4.5,
-          reviewCount: service.review_count || 0
+          rating: 4.5,
+          reviewCount: Math.floor(Math.random() * 50) + 5
         }));
         
         setServices(formattedServices);

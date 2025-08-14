@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '@/config/api';
 import { ServiceProps } from '@/components/ServiceCard';
 import ServiceCard from '@/components/ServiceCard';
 import { Loader2 } from 'lucide-react';
@@ -18,9 +18,8 @@ const LocationServices = () => {
     const fetchServicesByLocation = async () => {
       try {
         setLoading(true);
-        const apiUrl = 'https://themabinti-main-d4az.onrender.com/api/services';
-        console.log('Fetching from:', apiUrl, 'with location:', decodedLocation);
-        const response = await axios.get(apiUrl, {
+        console.log('Fetching services with location:', decodedLocation);
+        const response = await api.get('/api/services', {
           params: { location: decodedLocation },
         });
 

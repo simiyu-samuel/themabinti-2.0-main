@@ -15,7 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/config/api';
+import { useAuth } from '@/hooks/useAuth';
 
 const formSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -44,6 +45,7 @@ const formSchema = z.object({
 const SignUpForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'failed'>('idle');
   const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
@@ -73,15 +75,14 @@ const SignUpForm = () => {
 
     const poll = async () => {
       try {
-        const response = await axios.post('https://themabinti-main-d4az.onrender.com/api/check-seller-payment', {
+        const response = await api.post('/api/check-seller-payment', {
           checkoutRequestId
         });
 
         if (response.data.success) {
           setPaymentStatus('success');
-          // Store token and user data
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+          // Use auth context to handle login
+          login(response.data.token, response.data.user);
           toast.success('Registration completed successfully!');
           navigate('/');
           return;
@@ -156,7 +157,7 @@ const SignUpForm = () => {
       console.log('Sending register request:', userData); // Debug log
 
       // Send POST request to backend
-      const response = await axios.post('https://themabinti-main-d4az.onrender.com/api/register', userData);
+      const response = await api.post('/api/register', userData);
       
       if (response.data.requiresPayment) {
         // Seller registration requires payment
@@ -169,8 +170,7 @@ const SignUpForm = () => {
       } else {
         // Buyer registration completed immediately
         if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+          login(response.data.token, response.data.user);
           toast.success('Account created successfully!');
           navigate('/');
         } else {
