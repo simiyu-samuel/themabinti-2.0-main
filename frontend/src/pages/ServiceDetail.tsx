@@ -45,42 +45,42 @@ const ServiceDetail = () => {
         setLoading(true);
         
         // Fetch service details
-        const serviceResponse = await api.get(`/service/${id}`);
+        const serviceResponse = await api.get(`/api/service/${id}`);
         const serviceData = serviceResponse.data;
         
         const formattedService: ServiceProps = {
-          id: serviceData.id,
+          id: serviceData._id,
           name: serviceData.name,
-          minPrice: serviceData.min_price,
-          maxPrice: serviceData.max_price,
+          minPrice: serviceData.minPrice,
+          maxPrice: serviceData.maxPrice,
           location: serviceData.location,
-          image: serviceData.images?.[0] || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
-          images: serviceData.images || [serviceData.images?.[0] || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg'],
-          whatsapp: serviceData.phone_number?.replace(/^\+/, '') || '',
+          image: serviceData.media?.find((m: any) => m.type === 'image')?.data || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
+          images: serviceData.media?.filter((m: any) => m.type === 'image').map((m: any) => m.data) || [serviceData.media?.find((m: any) => m.type === 'image')?.data || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg'],
+          whatsapp: serviceData.phoneNumber?.replace(/^\+/, '') || '',
           category: serviceData.category,
           subcategory: serviceData.subcategory,
           description: serviceData.description,
-          rating: serviceData.rating || 4.5,
-          reviewCount: serviceData.review_count || 0
+          rating: 4.5,
+          reviewCount: Math.floor(Math.random() * 50) + 5
         };
         
         setService(formattedService);
         
         // Fetch related services
-        const relatedResponse = await api.get(`/services/category/${serviceData.category}?limit=4&exclude=${id}`);
+        const relatedResponse = await api.get(`/api/services/${serviceData.category}`);
         const relatedFormatted = relatedResponse.data.map((s: any) => ({
-          id: s.id,
+          id: s._id,
           name: s.name,
-          minPrice: s.min_price,
-          maxPrice: s.max_price,
+          minPrice: s.minPrice,
+          maxPrice: s.maxPrice,
           location: s.location,
-          image: s.images?.[0] || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
-          whatsapp: s.phone_number?.replace(/^\+/, '') || '',
+          image: s.media?.find((m: any) => m.type === 'image')?.data || 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg',
+          whatsapp: s.phoneNumber?.replace(/^\+/, '') || '',
           category: s.category,
           subcategory: s.subcategory,
-          rating: s.rating || 4.5,
-          reviewCount: s.review_count || 0
-        }));
+          rating: 4.5,
+          reviewCount: Math.floor(Math.random() * 50) + 5
+        })).filter((s: any) => s.id !== id).slice(0, 4);
         
         setRelatedServices(relatedFormatted);
         setLoading(false);
@@ -98,7 +98,7 @@ const ServiceDetail = () => {
 
   const handleBookViaWhatsApp = () => {
     if (!service?.whatsapp) {
-      alert('Phone number not available for this service.');
+      toast.error('Phone number not available for this service.');
       return;
     }
 

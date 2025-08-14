@@ -27,6 +27,7 @@ const serviceSchema = new mongoose.Schema({
     ],
   },
   subcategory: { type: String, required: true },
+  description: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
 });
 

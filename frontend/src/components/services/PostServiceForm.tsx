@@ -26,7 +26,8 @@ import { toast } from 'sonner';
 import { Upload, X } from 'lucide-react';
 import { serviceCategories } from '@/data/serviceCategories';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '@/config/api';
+import { useAuth } from '@/hooks/useAuth';
 
 
 const formSchema = z.object({
@@ -49,6 +50,7 @@ interface UploadedFile {
 
 const PostServiceForm = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,32 +72,27 @@ const PostServiceForm = () => {
 
   // Check user authentication and package limits
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      try {
-        const userData = JSON.parse(user);
-        console.log('User data:', userData); // Debug
-        if (userData.accountType === 'seller' && userData.sellerPackage) {
-          setPackageLimits({
-            packageId: userData.sellerPackage.packageId || '',
-            photoUploads: userData.sellerPackage.photoUploads || 0,
-          });
-        } else {
-          console.log(`The user account type is: ${userData.accountType}`)
-          console.log(`The user data package is: ${userData.sellerPackage}`)
-          toast.error('Only sellers can post services');
-          navigate('/signin');
-        }
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        toast.error('Invalid user data');
-        navigate('/signin');
-      }
-    } else {
+    if (!isAuthenticated) {
       toast.error('Please sign in to post a service');
       navigate('/signin');
+      return;
     }
-  }, [navigate]);
+
+    if (user) {
+      console.log('User data:', user); // Debug
+      if (user.accountType === 'seller' && user.sellerPackage) {
+        setPackageLimits({
+          packageId: user.sellerPackage.packageId || '',
+          photoUploads: user.sellerPackage.photoUploads || 0,
+        });
+      } else {
+        console.log(`The user account type is: ${user.accountType}`)
+        console.log(`The user data package is: ${user.sellerPackage}`)
+        toast.error('Only sellers can post services');
+        navigate('/signin');
+      }
+    }
+  }, [navigate, user, isAuthenticated]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -202,12 +199,7 @@ const PostServiceForm = () => {
         description: payload.description,
       });
 
-      const response = await axios.post('https://themabinti-main-d4az.onrender.com/api/services', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.post('/api/services', payload);
 
       toast.success('Service posted successfully!');
       navigate('/all-services');

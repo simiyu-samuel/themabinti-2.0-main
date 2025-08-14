@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '@/config/api';
 import { ServiceProps } from '@/components/ServiceCard';
 import ServiceCard from '@/components/ServiceCard';
 import { Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ const SearchResults = () => {
     const fetchSearchResults = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://themabinti-main-d4az.onrender.com/api/services/search', {
+        const response = await api.get('/api/services/search', {
           params: { query },
         });
 

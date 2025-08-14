@@ -2,12 +2,11 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' 
-    ? 'https://your-production-domain.com/api' 
-    : 'http://localhost:5000/api',
+  baseURL: 'https://themabinti-main-d4az.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 second timeout
 });
 
 // Add request interceptor to include auth token
@@ -37,4 +36,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+export default api;

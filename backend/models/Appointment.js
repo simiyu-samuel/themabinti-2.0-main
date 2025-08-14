@@ -32,7 +32,12 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    match: [/^\+?\d{10,15}$/, 'Please enter a valid phone number']
+    validate: {
+      validator: function(v) {
+        return /^\+?\d{10,15}$/.test(v);
+      },
+      message: 'Please enter a valid phone number'
+    }
   },
   date: {
     type: Date,

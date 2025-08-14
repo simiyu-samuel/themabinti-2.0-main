@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 
 interface User {
-  id: string;
+  id?: string;
   userName: string;
   email: string;
   accountType: 'buyer' | 'seller' | 'admin';
@@ -42,6 +42,7 @@ export const useAuthState = () => {
     if (token && userData) {
       try {
         const parsedUser = JSON.parse(userData);
+        console.log('Loaded user from localStorage:', parsedUser);
         setUser(parsedUser);
       } catch (error) {
         console.error('Error parsing user data:', error);
@@ -55,12 +56,14 @@ export const useAuthState = () => {
   const login = (token: string, userData: User) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    console.log('User logged in:', userData);
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    console.log('User logged out');
     setUser(null);
   };
 
