@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/components/AuthProvider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SignInPage from "./pages/SignInPage";
@@ -20,36 +21,42 @@ import SearchResults from "./pages/SearchResults";
 import LocationServices from "./pages/LocationServices";
 import SubcategoryServices from "./pages/SubcategoryServices";
 import PaymentPage from "./pages/PaymentPage";
+import SellerDashboard from "./pages/SellerDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/signup-options" element={<SignUpOptionsPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/seller-packages" element={<SellerPackagesPage />} />
-          <Route path="/post-service" element={<PostServicePage />} />
-          <Route path="/service/:id" element={<ServiceDetail />} />
-          <Route path="/blogs" element={<BlogsPage />} />
-          <Route path="/about" element={<AboutUsPage />} />
-          <Route path="/contact" element={<ContactUsPage />} />
-          <Route path="/all-services" element={<AllServicesPage />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="/services/location/:location" element={<LocationServices />} />
-          <Route path="/services/:category/:subcategory" element={<SubcategoryServices />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/signin" element={<SignInPage />} />
+            <Route path="/signup-options" element={<SignUpOptionsPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/seller-packages" element={<SellerPackagesPage />} />
+            <Route path="/post-service" element={<PostServicePage />} />
+            <Route path="/service/:id" element={<ServiceDetail />} />
+            <Route path="/blogs" element={<BlogsPage />} />
+            <Route path="/about" element={<AboutUsPage />} />
+            <Route path="/contact" element={<ContactUsPage />} />
+            <Route path="/all-services" element={<AllServicesPage />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/services/location/:location" element={<LocationServices />} />
+            <Route path="/services/:category/:subcategory" element={<SubcategoryServices />} />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/seller-dashboard" element={<SellerDashboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

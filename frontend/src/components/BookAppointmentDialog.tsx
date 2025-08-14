@@ -83,7 +83,8 @@ const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmen
     
     try {
       const response = await api.post('/api/appointments', {
-        serviceId: actualServiceId,
+        serviceId: actualServiceId || null,
+        bookingType: actualServiceId ? 'service' : 'general',
         name,
         email,
         phoneNumber,
@@ -94,20 +95,25 @@ const BookAppointmentDialog = ({ open, onOpenChange, serviceId }: BookAppointmen
       
       const appointmentId = response.data.appointment._id;
       
-      // Navigate to payment page with appointment details
-      navigate('/payment', {
-        state: {
-          appointmentId,
-          serviceId: actualServiceId,
-          customerName: name,
-          customerEmail: email,
-          customerPhone: phoneNumber,
-          appointmentDate: selectedDate,
-          appointmentTime: selectedTime
-        }
-      });
+      if (actualServiceId) {
+        // Navigate to payment page for service bookings
+        navigate('/payment', {
+          state: {
+            appointmentId,
+            serviceId: actualServiceId,
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phoneNumber,
+            appointmentDate: selectedDate,
+            appointmentTime: selectedTime
+          }
+        });
+      } else {
+        // For general appointments, just show success
+        toast.success('Appointment booked successfully! We will contact you soon.');
+        onOpenChange(false);
+      }
       
-      onOpenChange(false);
     } catch (error: any) {
       console.error('Error booking appointment:', error);
       const errorMessage = error.response?.data?.message || 'Failed to book appointment. Please try again.';

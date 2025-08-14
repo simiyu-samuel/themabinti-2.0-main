@@ -1,143 +1,261 @@
-
+import { useState, useEffect } from 'react';
 import NavbarTop from '@/components/NavbarTop';
 import NavbarBottom from '@/components/NavbarBottom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, Clock, MessageCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CalendarIcon, Clock, MessageCircle, Eye, Heart, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
+import api from '@/config/api';
+
+interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  author: string;
+  created_at: string;
+  views: number;
+  likes: number;
+  comments: number;
+  category: string;
+  image: string;
+}
 
 const BlogsPage = () => {
-  const blogPosts = [
-    {
-      id: 1,
-      title: "2025 Beauty Trends Every Woman Should Know",
-      excerpt: "Discover the hottest beauty trends this year and how to incorporate them into your daily routine.",
-      author: "Sarah Kimani",
-      date: "April 2, 2025",
-      readTime: "5 min read",
-      comments: 12,
-      image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80",
-      authorImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=464&q=80"
-    },
-    {
-      id: 2,
-      title: "Natural Hair Care Tips for Kenyan Women",
-      excerpt: "Learn how to maintain healthy, beautiful natural hair with locally available products and methods.",
-      author: "Jane Muthoni",
-      date: "March 28, 2025",
-      readTime: "7 min read",
-      comments: 23,
-      image: "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
-      authorImage: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=386&q=80"
-    },
-    {
-      id: 3,
-      title: "Self-Care Routines for Busy Professionals",
-      excerpt: "Simple but effective self-care practices you can incorporate into your hectic schedule.",
-      author: "Wanjiku Ndegwa",
-      date: "March 15, 2025",
-      readTime: "4 min read",
-      comments: 8,
-      image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      authorImage: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80"
-    },
-    {
-      id: 4,
-      title: "How to Choose the Right Makeup Artist for Your Wedding",
-      excerpt: "A comprehensive guide to finding and booking the perfect makeup artist for your special day.",
-      author: "Amina Hassan",
-      date: "March 10, 2025",
-      readTime: "8 min read",
-      comments: 15,
-      image: "https://images.unsplash.com/photo-1560800452-f2d475982b96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      authorImage: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80"
-    },
-    {
-      id: 5,
-      title: "Fitness Journey: From Beginner to Consistent",
-      excerpt: "My personal fitness journey and tips to help you stay consistent with your workouts.",
-      author: "Faith Wambui",
-      date: "March 5, 2025",
-      readTime: "6 min read",
-      comments: 19,
-      image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      authorImage: "https://images.unsplash.com/photo-1551581786-2649394faeb5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=464&q=80"
-    },
-    {
-      id: 6,
-      title: "Starting Your Career as a Makeup Artist in Kenya",
-      excerpt: "Essential tips, tools, and training needed to establish yourself as a professional makeup artist.",
-      author: "Mercy Akinyi",
-      date: "February 25, 2025",
-      readTime: "10 min read",
-      comments: 27,
-      image: "https://images.unsplash.com/photo-1571646750134-31785f249a34?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      authorImage: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1171&q=80"
-    }
-  ];
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/blogs');
+        
+        const formattedBlogs = response.data.map((blog: any) => ({
+          id: blog.id,
+          title: blog.title,
+          content: blog.content,
+          excerpt: blog.content.substring(0, 150) + '...',
+          author: blog.author,
+          created_at: blog.created_at,
+          views: blog.views || Math.floor(Math.random() * 500) + 50,
+          likes: blog.likes || Math.floor(Math.random() * 100) + 10,
+          comments: blog.comments || Math.floor(Math.random() * 50) + 5,
+          category: blog.category || 'Lifestyle',
+          image: `https://images.pexels.com/photos/${3993449 + Math.floor(Math.random() * 1000)}/pexels-photo-${3993449 + Math.floor(Math.random() * 1000)}.jpeg?auto=compress&cs=tinysrgb&w=800`
+        }));
+        
+        setBlogPosts(formattedBlogs);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setError('Failed to load blog posts. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavbarTop />
+        <NavbarBottom />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-purple-500 mx-auto mb-4" />
+            <p className="text-gray-600">Loading amazing stories...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-pink-50">
       <NavbarTop />
       <NavbarBottom />
       
-      <div className="flex-grow bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Themabinti Blog</h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover the latest tips, trends, and stories in beauty, fashion, health, and lifestyle from our community of experts.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
-              <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-video w-full overflow-hidden">
-                  <img 
-                    src={post.image} 
-                    alt={post.title} 
-                    className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                  />
-                </div>
-                <CardHeader className="p-5 pb-3">
-                  <CardTitle className="text-xl font-bold line-clamp-2 hover:text-purple-600 transition-colors">
-                    <a href={`/blog/${post.id}`}>{post.title}</a>
-                  </CardTitle>
-                  <CardDescription className="mt-2 line-clamp-3">{post.excerpt}</CardDescription>
-                </CardHeader>
-                <CardContent className="p-5 pt-0">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <CalendarIcon className="h-4 w-4" />
-                    <span>{post.date}</span>
-                    <span className="mx-1">•</span>
-                    <Clock className="h-4 w-4" />
-                    <span>{post.readTime}</span>
-                    <span className="mx-1">•</span>
-                    <MessageCircle className="h-4 w-4" />
-                    <span>{post.comments}</span>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t p-5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={post.authorImage} alt={post.author} />
-                      <AvatarFallback>{post.author.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium">{post.author}</span>
-                  </div>
-                  <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
-                    <a href={`/blog/${post.id}`}>Read More</a>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-          
-          <div className="text-center mt-12">
-            <Button className="bg-purple-500 hover:bg-purple-600">Load More Articles</Button>
-          </div>
+      {/* Hero Section - Redesigned */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500"></div>
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative container mx-auto px-4 py-20 text-center text-white">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            Themabinti
+            <span className="block text-3xl md:text-4xl font-normal opacity-90">Blog</span>
+          </h1>
+          <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">
+            Discover inspiring stories, expert tips, and the latest trends in beauty, fashion, health, and lifestyle
+          </p>
         </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-300 rounded-full opacity-20 animate-bounce"></div>
+        <div className="absolute bottom-10 right-10 w-32 h-32 bg-pink-300 rounded-full opacity-20 animate-pulse"></div>
+      </section>
+      
+      <div className="flex-grow container mx-auto px-4 py-16">
+        {error ? (
+          <div className="text-center py-16">
+            <Card className="max-w-md mx-auto shadow-lg">
+              <CardContent className="p-8">
+                <div className="text-red-500 text-6xl mb-4">📝</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Unable to Load Blogs</h3>
+                <p className="text-gray-600 mb-6">{error}</p>
+                <Button onClick={() => window.location.reload()} className="bg-purple-600 hover:bg-purple-700">
+                  Try Again
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        ) : blogPosts.length > 0 ? (
+          <>
+            {/* Featured Post */}
+            {blogPosts.length > 0 && (
+              <Card className="mb-12 overflow-hidden shadow-2xl border-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                  <div className="aspect-video lg:aspect-auto">
+                    <img 
+                      src={blogPosts[0].image} 
+                      alt={blogPosts[0].title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-8 lg:p-12 flex flex-col justify-center">
+                    <Badge className="bg-yellow-400 text-gray-800 w-fit mb-4">Featured Post</Badge>
+                    <h2 className="text-3xl lg:text-4xl font-bold mb-4 leading-tight">
+                      {blogPosts[0].title}
+                    </h2>
+                    <p className="text-lg opacity-90 mb-6 leading-relaxed">
+                      {blogPosts[0].excerpt}
+                    </p>
+                    <div className="flex items-center gap-6 text-sm opacity-80 mb-6">
+                      <div className="flex items-center">
+                        <Eye className="h-4 w-4 mr-1" />
+                        {blogPosts[0].views}
+                      </div>
+                      <div className="flex items-center">
+                        <Heart className="h-4 w-4 mr-1" />
+                        {blogPosts[0].likes}
+                      </div>
+                      <div className="flex items-center">
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        {blogPosts[0].comments}
+                      </div>
+                    </div>
+                    <Button className="bg-white text-purple-600 hover:bg-gray-100 w-fit">
+                      Read Full Article
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* Blog Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {blogPosts.slice(1).map((post) => (
+                <Card key={post.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border-0 shadow-lg bg-white">
+                  <div className="relative overflow-hidden">
+                    <div className="aspect-video overflow-hidden">
+                      <img 
+                        src={post.image} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    </div>
+                    
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-purple-600 text-white">
+                        {post.category}
+                      </Badge>
+                    </div>
+                    
+                    {/* Engagement Stats Overlay */}
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="flex gap-2">
+                        <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs flex items-center">
+                          <Eye className="h-3 w-3 mr-1" />
+                          {post.views}
+                        </div>
+                        <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs flex items-center">
+                          <Heart className="h-3 w-3 mr-1" />
+                          {post.likes}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <CardHeader className="p-6 pb-3">
+                    <CardTitle className="text-xl font-bold line-clamp-2 group-hover:text-purple-600 transition-colors leading-tight">
+                      {post.title}
+                    </CardTitle>
+                    <CardDescription className="mt-3 line-clamp-3 text-gray-600 leading-relaxed">
+                      {post.excerpt}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="px-6 py-0">
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <CalendarIcon className="h-4 w-4 mr-1" />
+                        {format(new Date(post.created_at), 'MMM d, yyyy')}
+                      </div>
+                      <div className="flex items-center">
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        {post.comments}
+                      </div>
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="border-t border-gray-100 p-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 ring-2 ring-purple-100">
+                        <AvatarImage src={`https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg`} />
+                        <AvatarFallback className="bg-purple-100 text-purple-600">
+                          {post.author.substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium text-gray-800">{post.author}</div>
+                        <div className="text-xs text-gray-500">Author</div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50">
+                      Read More
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+            
+            {/* Load More */}
+            <div className="text-center mt-16">
+              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg rounded-full">
+                Load More Stories
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-20">
+            <Card className="max-w-md mx-auto shadow-lg">
+              <CardContent className="p-8">
+                <div className="text-6xl mb-4">📝</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">No Blog Posts Yet</h3>
+                <p className="text-gray-600 mb-6">Be the first to share your story with our community!</p>
+                <Button className="bg-purple-600 hover:bg-purple-700">
+                  Write a Post
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

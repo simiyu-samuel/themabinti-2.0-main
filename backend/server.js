@@ -32,6 +32,8 @@ app.use('/api/blogs', blogsRouter);
 app.use('/api/appointments', appointmentsRouter);
 app.use('/api/mpesa', mpesaRoutes);
 app.use('/api/service-bookings', require('./routes/serviceBookings'));
+app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/dashboard', require('./routes/dashboard'));
 
 /**app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../themabinti.com/build', 'index.html')); // Adjust path if needed

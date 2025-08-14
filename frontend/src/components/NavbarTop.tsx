@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, User, ChevronDown, Menu, X, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -21,41 +22,15 @@ import { serviceCategories } from '@/data/serviceCategories';
 
 const NavbarTop = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isSeller, setIsSeller] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [firstName, setFirstName] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
 
-  // Logout function
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setIsLoggedIn(false);
-    setIsSeller(false);
-    setFirstName('');
-  };
-
-  // Check localStorage for token and user data on mount
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-
-    if (token && user) {
-      try {
-        const userData = JSON.parse(user);
-        setIsLoggedIn(true);
-        setIsSeller(userData.accountType === 'seller');
-        // Extract first name from userName (e.g., "John Doe" -> "John")
-        setFirstName(userData.userName.split(' ')[0] || '');
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        handleLogout(); // Clear invalid data
-      }
-    }
-  }, []);
+  const firstName = user?.userName.split(' ')[0] || '';
+  const isSeller = user?.accountType === 'seller';
+  const isAdmin = user?.accountType === 'admin';
 
   // Handle scroll event to add shadow to navbar when scrolled
   useEffect(() => {
@@ -66,11 +41,6 @@ const NavbarTop = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // For demo purposes, toggle login state
-  //const toggleLogin = () => {
-  //  setIsLoggedIn(!isLoggedIn);
-  //};
 
   // Handle search submission
   const handleSearch = (e: React.FormEvent) => {
@@ -83,7 +53,7 @@ const NavbarTop = () => {
   };
 
   return (
-    <div className={`sticky top-0 z-50 bg-white ${isScrolled ? 'shadow-md' : ''}`}>
+    <div className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md ${isScrolled ? 'shadow-lg' : 'shadow-sm'} transition-all duration-300`}>
       <div className="container mx-auto py-4">
         <div className="flex items-center justify-between">
           {/* Mobile Menu Button */}
@@ -220,26 +190,36 @@ const NavbarTop = () => {
           <div className="flex items-center space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center px-2 py-1 rounded-full hover:bg-gray-100">
+                <button className="flex items-center px-3 py-2 rounded-full hover:bg-purple-50 transition-colors duration-200 border border-purple-100">
                   <User className="h-5 w-5" />
-                  {isLoggedIn && firstName && (
-                    <span className="mx-1 text-sm font-medium">{firstName}</span>
+                  {isAuthenticated && firstName && (
+                    <span className="mx-2 text-sm font-medium text-gray-700">{firstName}</span>
                   )}
                   <ChevronDown className="h-4 w-4 ml-1" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {isLoggedIn ? (
+                {isAuthenticated ? (
                   <>
                     <DropdownMenuItem>
-                      <Link to="/account" className="w-full">My Account</Link>
+                      <Link to="/account" className="w-full">My Profile</Link>
                     </DropdownMenuItem>
                     {isSeller && (
+                      <>
+                        <DropdownMenuItem>
+                          <Link to="/seller-dashboard" className="w-full">Seller Dashboard</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Link to="/post-service" className="w-full">Post a Service</Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {isAdmin && (
                       <DropdownMenuItem>
-                        <Link to="/post-service" className="w-full">Post a Service</Link>
+                        <Link to="/admin-dashboard" className="w-full">Admin Dashboard</Link>
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuItem onClick={logout}>
                       Logout
                     </DropdownMenuItem>
                   </>
@@ -256,16 +236,14 @@ const NavbarTop = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Book Appointment Button - Hide text on small mobile */}
-            
-
-            {/* For demo purposes - toggle login state - Hide on mobile */}
-            {/*<button 
-              className="ml-2 hidden md:flex px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100"
-              onClick={toggleLogin} 
-            >
-              {isLoggedIn ? 'Demo: Logout' : 'Demo: Login'}
-            </button>*/}
+            {/* Quick Action Button */}
+            {!isAuthenticated && (
+              <Link to="/signup-options">
+                <Button size="sm" className="ml-3 bg-purple-600 hover:bg-purple-700 rounded-full px-6">
+                  Join Now
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
